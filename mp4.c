@@ -19,7 +19,7 @@ void *debug_malloc(size_t size, const char *file, int line, const char *func)
 //#define malloc(s) debug_malloc(s, __FILE__, __LINE__, __func__)
 void *debug_free(char *p)
 {
-        printf("%s:%d:%s:free(0x%lx)\n", __FILE__, __LINE__,  __func__, (unsigned long)p);
+        //printf("%s:%d:%s:free(0x%lx)\n", __FILE__, __LINE__,  __func__, (unsigned long)p);
             if(NULL!=(p))
             {
             	free(p) ;
@@ -345,7 +345,7 @@ static int MP4_ReadBoxContainer( stream_t *p_stream, mp4_box_t *p_container )
    /* enter box */
    stream_seek( p_stream, p_container->i_pos +
       mp4_box_headersize( p_container ), SEEK_SET );
-
+ 
    return MP4_ReadBoxContainerRaw( p_stream, p_container );
 }
 
@@ -438,9 +438,10 @@ static void MP4_FreeBox_ftyp( mp4_box_t *p_box )
 
 static int MP4_ReadBox_mmpu( stream_t *p_stream, mp4_box_t *p_box )
 {
+   unsigned int mmpu_buf;
+   int i;
    MP4_READBOX_ENTER( mp4_box_data_mmpu_t );
-   MP4_GETVERSIONFLAGS( p_box->data.p_mmpu );
-   unsigned int  mmpu_buf;
+   MP4_GETVERSIONFLAGS(p_box->data.p_mmpu);
    MP4_GET1BYTE(mmpu_buf);
    p_box->data.p_mmpu->is_complete=(mmpu_buf>>7)&0x01;
    p_box->data.p_mmpu->reserved=mmpu_buf&0x7F;
@@ -448,7 +449,6 @@ static int MP4_ReadBox_mmpu( stream_t *p_stream, mp4_box_t *p_box )
    MP4_GETFOURCC( p_box->data.p_mmpu->asset_id_scheme );
    MP4_GET4BYTES( p_box->data.p_mmpu->asset_id_length );
    p_box->data.p_mmpu->asset_id_value=(char *)malloc(p_box->data.p_mmpu->asset_id_length);
-   int i;
    for (i=0;i<p_box->data.p_mmpu->asset_id_length;i++)
    {
 
@@ -1769,6 +1769,8 @@ void MP4_FreeBox_sample_vide( mp4_box_t *p_box )
 int MP4_ReadBox_sample_mmth( stream_t *p_stream, mp4_box_t *p_box )
 {
    unsigned int i = 0;
+   unsigned int  mmth_buf;
+   int j;
    MP4_READBOX_ENTER( mp4_box_data_sample_mmth_t );
 
    for( i = 0; i < 6 ; i++ )
@@ -1782,21 +1784,19 @@ int MP4_ReadBox_sample_mmth( stream_t *p_stream, mp4_box_t *p_box )
    MP4_GET2BYTES( p_box->data.p_sample_mmth->hinttrackversion );
    MP4_GET2BYTES( p_box->data.p_sample_mmth->highestcompatibleversion );
    MP4_GET2BYTES( p_box->data.p_sample_mmth->packet_id );
-   unsigned int  mmth_buf;
    MP4_GET1BYTE(mmth_buf);
    p_box->data.p_sample_mmth->has_mfus_flag=(mmth_buf>>7)&0x01;
    p_box->data.p_sample_mmth->is_timed=(mmth_buf>>6)&0x01;
    p_box->data.p_sample_mmth->reserved=mmth_buf&0x3F;
 
-   MP4_GETFOURCC( p_box->data.p_sample_mmth->asset_id_scheme );
+   /*MP4_GETFOURCC( p_box->data.p_sample_mmth->asset_id_scheme );
    MP4_GET4BYTES( p_box->data.p_sample_mmth->asset_id_length );
    p_box->data.p_sample_mmth->asset_id_value=(char *)malloc(p_box->data.p_sample_mmth->asset_id_length);
-   int j;
    for (j=0;j<p_box->data.p_sample_mmth->asset_id_length;j++)
 	  {
 
 	   MP4_GET1BYTE( p_box->data.p_sample_mmth->asset_id_value[j] );
-	  }
+	  }*/
 
    MP4_READBOX_EXIT( 1 );
 }
@@ -3516,165 +3516,45 @@ mp4_box_t *MP4_BoxGetRoot(stream_t * s)
 //after  get full struct of the mp4,you can use this function to get the special box
 mp4_box_t * MP4_BoxSearchBox(mp4_box_t *p_head, uint32_t i_type)
 {
-	//mp4_box_t *cur = p_head, *prev = NULL;
 	mp4_box_t *cur = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
-	mp4_box_t *prev = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
+	mp4_box_t *temp = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
 	cur = p_head;
-	prev = NULL;
+	temp = NULL;
 
     while (cur != NULL)
     {
-        if (cur->p_first == NULL)          // 1.
+		if (cur->i_type==ATOM_moov||cur->i_type==ATOM_trak||cur->i_type==ATOM_mdia||cur->i_type==ATOM_moof \
+			||cur->i_type==ATOM_minf||cur->i_type==ATOM_stbl||cur->i_type==ATOM_dinf||cur->i_type==ATOM_edts \
+			||cur->i_type==ATOM_udta||cur->i_type==ATOM_nmhd||cur->i_type==ATOM_hnti||cur->i_type==ATOM_rmra \
+			||cur->i_type==ATOM_rmda||cur->i_type==ATOM_tref||cur->i_type==ATOM_gmhd||cur->i_type==ATOM_wave \
+			||cur->i_type==ATOM_ilst||cur->i_type==ATOM_mvex||cur->i_type==ATOM_stsd||cur->i_type==ATOM_tref \
+			||cur->i_type==ATOM_traf||cur->i_type==ATOM_mfra||cur->i_type==ATOM_root)
         {
-        	if(cur->i_type == i_type)
-				{
-					return(cur); /*已经找到*/
-				}
-            cur = cur->p_next;
+			printf("current box is %c%c%c%c\n",cur->i_type&0x000000ff,(cur->i_type&0x0000ff00)>>8,(cur->i_type&0x00ff0000)>>16,(cur->i_type&0xff000000)>>24);
+			if(cur->i_type==i_type)
+				return cur;
+        	 // find predecessor
+			temp=cur;
+            cur = cur->p_first;
+			if(!MP4_BoxSearchBox(cur, i_type))
+			{
+				cur=temp;
+				cur=cur->p_next;
+			}
         }
         else
         {
-            // find predecessor
-            prev = cur->p_first;
-            while (prev->p_next != NULL && prev->p_next != cur)
-                prev = prev->p_next;
-
-            if (prev->p_next == NULL)   // 2.a)
-            {
-                prev->p_next = cur;
-                if(cur->i_type == i_type)
-					{
-						return(cur); /*已经找到*/
-					}
-                cur = cur->p_first;
-            }
-            else                       // 2.b)
-            {
-                prev->p_next = NULL;
-                if(cur->i_type == i_type)
-					{
-						return(cur); /*已经找到*/
-					}
-                cur = cur->p_next;
-            }
+			printf("current box is %c%c%c%c\n",cur->i_type&0x000000ff,(cur->i_type&0x0000ff00)>>8,(cur->i_type&0x00ff0000)>>16,(cur->i_type&0xff000000)>>24);
+			if(cur->i_type == i_type)
+				{
+					return(cur); /*Find the box*/
+				}
+            cur = cur->p_next;
         }
     }
     return(NULL);
 }
 
-void  MP4_BoxSearchBox2(mp4_box_t *p_head, mp4_box_t** search_box,uint32_t i_type)
-{
-	mp4_box_t *cur = p_head, *prev = NULL;
-	//mp4_box_t *cur = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
-	//mp4_box_t *prev = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
-	cur = p_head;
-	prev = NULL;
-
-    while (cur != NULL)
-    {
-        if (cur->p_first == NULL)          // 1.
-        {
-        	if(cur->i_type == i_type)
-				{
-
-					//*search_box=cur;
-					free(cur);
-					free(prev);
-					break;
-				}
-            cur = cur->p_next;
-        }
-        else
-        {
-            // find predecessor
-            prev = cur->p_first;
-            while (prev->p_next != NULL && prev->p_next != cur)
-                prev = prev->p_next;
-
-            if (prev->p_next == NULL)   // 2.a)
-            {
-                prev->p_next = cur;
-                if(cur->i_type == i_type)
-					{
-                	//*search_box=cur;
-                	free(cur);
-                	free(prev);
-                	break;
-					}
-                cur = cur->p_first;
-            }
-            else                       // 2.b)
-            {
-                prev->p_next = NULL;
-                if(cur->i_type == i_type)
-					{
-                	//*search_box=cur;
-                	free(cur);
-                	free(prev);
-                	break;
-					}
-                cur = cur->p_next;
-            }
-        }
-    }
-
-}
-
-//after  get full struct of the mp4,you can use this function to get the special box
-int MP4_BoxSearchBox3(mp4_box_t *p_head, uint32_t i_type)
-{
-	//mp4_box_t *cur = p_head, *prev = NULL;
-	mp4_box_t *cur = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
-	mp4_box_t *prev = calloc( 1, sizeof( mp4_box_t ) ); /* Needed to ensure simple on error handler */
-	cur = p_head;
-	prev = NULL;
-
-    while (cur != NULL)
-    {
-        if (cur->p_first == NULL)          // 1.
-        {
-        	if(cur->i_type == i_type)
-				{
-        		printf("1\n");
-        		//return(1); /*已经找到*/
-//					return(cur); /*已经找到*/
-				}
-            cur = cur->p_next;
-        }
-        else
-        {
-            // find predecessor
-            prev = cur->p_first;
-            while (prev->p_next != NULL && prev->p_next != cur)
-                prev = prev->p_next;
-
-            if (prev->p_next == NULL)   // 2.a)
-            {
-                prev->p_next = cur;
-                if(cur->i_type == i_type)
-					{
-                	printf("2\n");
-  //              		return(2); /*已经找到*/
-//						return(cur); /*已经找到*/
-					}
-                cur = cur->p_first;
-            }
-            else                       // 2.b)
-            {
-                prev->p_next = NULL;
-                if(cur->i_type == i_type)
-					{
-              	printf("3\n");
-  //              	return(3); /*已经找到*/
-//						return(cur); /*已经找到*/
-					}
-                cur = cur->p_next;
-            }
-        }
-    }
-    printf("aa0\n");
-//    return(0);
-}
 /*****************************************************************************
 * MP4_ReadBox : parse the actual box and the children
 *  XXX : Do not go to the next box

@@ -517,9 +517,9 @@ typedef struct mp4_box_data_sample_mmth_s
     uint8_t has_mfus_flag;
     uint8_t is_timed;
     uint8_t reserved;
-    uint32_t asset_id_scheme;
+    /*uint32_t asset_id_scheme;
     uint32_t asset_id_length;
-    char *asset_id_value;
+    char *asset_id_value;*/
 
 } mp4_box_data_sample_mmth_t;
 
@@ -527,6 +527,7 @@ typedef struct mp4_box_data_mmthsample_s
 {
 	uint32_t sequence_number;
 	uint8_t trackrefindex;
+	uint32_t moviefragmentsequencenumber;
 	uint32_t samplenumber;
 	uint8_t priority;
 	uint8_t dependency_counter;
@@ -550,7 +551,7 @@ typedef struct mp4_box_data_muli_s
 	uint16_t view_id:10;
 
 	uint8_t layer_id:6;
-//	uint8_t temporal_id:3;
+	//uint8_t temporal_id:3;
 	uint8_t reserved3:7;
 
 } mp4_box_data_muli_t;
