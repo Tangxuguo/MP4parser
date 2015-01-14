@@ -63,6 +63,59 @@ int file_close(stream_t *stream_s)
    return fclose(file);
 }
 
+void* buffer_open(stream_t *stream_s, BUFFER_t *buffer)
+{
+   stream_s->opaque = (void *)buffer;
+
+   return buffer;
+}
+
+int buffer_read(stream_t *stream_s, void* buf, int size)
+{
+   BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
+   memcpy(buf,buffer->buf,size);
+   return size;
+}
+
+int buffer_write(stream_t *stream_s, void *buf, int size)
+{
+   BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
+   memcpy(buffer->buf,buf,size);
+   return size;
+}
+
+int buffer_peek(stream_t *stream_s, void* buf, int size)
+{
+   uint32_t offset = buffer_tell(stream_s);
+   int ret = buffer_read(stream_s, buf, size);
+   return ret;
+}
+
+uint64_t buffer_seek(stream_t *stream_s, int64_t offset,\
+	int whence)
+{
+   BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
+   (*buffer).offset = whence + offset;
+   memcpy(buffer->buf,buffer->begin_addr + (*buffer).offset,\
+	   (*buffer).filesize - (*buffer).offset );
+   return 0;
+}
+
+uint64_t buffer_tell(stream_t *stream_s)
+{
+   BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
+   return (*buffer).offset;
+}
+
+int buffer_close(stream_t *stream_s)
+{
+   BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
+   free(buffer->buf);
+   free(buffer->begin_addr);
+   free(buffer);
+   return 0;
+}
+
 stream_t* create_file_stream()
 {
    stream_t* s = malloc(sizeof(stream_t));
@@ -77,6 +130,24 @@ stream_t* create_file_stream()
 }
 
 void destory_file_stream(stream_t* stream_s)
+{
+   free(stream_s);
+}
+
+stream_t* create_buffer_stream()
+{
+   stream_t* s = malloc(sizeof(stream_t));
+   s->open = buffer_open;
+   s->read = buffer_read;
+   s->write = buffer_write;
+   s->peek = buffer_peek;
+   s->seek = buffer_seek;
+   s->tell = buffer_tell;
+   s->close = buffer_close;
+   return s;
+}
+
+void destory_buffer_stream(stream_t* stream_s)
 {
    free(stream_s);
 }

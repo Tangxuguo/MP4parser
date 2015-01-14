@@ -55,6 +55,24 @@ int file_close(stream_t *stream_s);
 stream_t* create_file_stream();
 void destory_file_stream(stream_t* stream_s);
 
+typedef struct BUFFER {
+	unsigned char *buf;
+	unsigned char *begin_addr;
+	unsigned long offset;
+	unsigned long filesize;
+}BUFFER_t;
+
+//read data form buffer,not binary file
+void* buffer_open(stream_t *stream_s, BUFFER_t *buffer);
+int buffer_read(stream_t *stream_s, void* buf, int size);
+int buffer_write(stream_t *stream_s, void *buf, int size);
+int buffer_peek(stream_t *stream_s, void* buf, int size);
+uint64_t buffer_seek(stream_t *stream_s, int64_t offset, int whence);
+uint64_t buffer_tell(stream_t *stream_s);
+int buffer_close(stream_t *stream_s);
+
+stream_t* create_buffer_stream();
+void destory_buffer_stream(stream_t* stream_s);
 
 // һ�����д������ļ�streamʵ��.
 #define READ_BUFFER_SIZE   10485760
