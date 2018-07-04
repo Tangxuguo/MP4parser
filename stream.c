@@ -45,7 +45,7 @@ int file_peek(stream_t *stream_s, void* buf, int size)
    return ret;
 }
 
-uint64_t file_seek(stream_t *stream_s, int64_t offset, int whence)
+uint64_t file_seek(stream_t *stream_s, long long offset, int whence)
 {
    FILE* file = (FILE*)stream_s->opaque;
    return fseek(file, offset, whence);
@@ -91,7 +91,7 @@ int buffer_peek(stream_t *stream_s, void* buf, int size)
    return ret;
 }
 
-uint64_t buffer_seek(stream_t *stream_s, int64_t offset,\
+uint64_t buffer_seek(stream_t *stream_s, long long offset,\
 	int whence)
 {
    BUFFER_t *buffer = (BUFFER_t *)stream_s->opaque;
@@ -305,7 +305,7 @@ int buf_file_peek(stream_t *stream_s, void* buf, int size)
    return len;
 }
 
-uint64_t buf_file_seek(stream_t *stream_s, int64_t offset, int whence)
+uint64_t buf_file_seek(stream_t *stream_s, long long offset, int whence)
 {
    buf_stream_t* s = (buf_stream_t*)stream_s;
    uint64_t ret = 0;
