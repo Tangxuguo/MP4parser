@@ -9,7 +9,6 @@ typedef short int16_t;
 typedef unsigned short uint16_t;
 typedef int int32_t;
 typedef unsigned uint32_t;
-typedef long long int64_t;
 typedef unsigned long long uint64_t;
 //typedef unsigned long size_t;
 #endif
@@ -27,7 +26,7 @@ typedef struct stream {
    int (*read)(struct stream *stream_s, void* buf, int size);
    int (*write)(struct stream *stream_s, void *buf, int size);
    int (*peek)(struct stream *stream_s, void* buf, int size);
-   uint64_t (*seek)(struct stream *stream_s, int64_t offset, int whence);
+   uint64_t (*seek)(struct stream *stream_s, long long offset, int whence);
    uint64_t (*tell)(struct stream *stream_s);
    int (*close)(struct stream *stream_s);
    void* opaque;
@@ -47,7 +46,7 @@ void* file_open(stream_t *stream_s, const char* filename, int mode);
 int file_read(stream_t *stream_s, void* buf, int size);
 int file_write(stream_t *stream_s, void *buf, int size);
 int file_peek(stream_t *stream_s, void* buf, int size);
-uint64_t file_seek(stream_t *stream_s, int64_t offset, int whence);
+uint64_t file_seek(stream_t *stream_s, long long offset, int whence);
 uint64_t file_tell(stream_t *stream_s);
 int file_close(stream_t *stream_s);
 
@@ -67,7 +66,7 @@ void* buffer_open(stream_t *stream_s, BUFFER_t *buffer);
 int buffer_read(stream_t *stream_s, void* buf, int size);
 int buffer_write(stream_t *stream_s, void *buf, int size);
 int buffer_peek(stream_t *stream_s, void* buf, int size);
-uint64_t buffer_seek(stream_t *stream_s, int64_t offset, int whence);
+uint64_t buffer_seek(stream_t *stream_s, long long offset, int whence);
 uint64_t buffer_tell(stream_t *stream_s);
 int buffer_close(stream_t *stream_s);
 
@@ -83,14 +82,14 @@ typedef struct buf_stream {
 
    struct read_buf {
       void* buf;        // ������.
-      int64_t bufsize;  // �����С.
-      int64_t offset;   // ���ļ��е�offset.
+      long long bufsize;  // �����С.
+      long long offset;   // ���ļ��е�offset.
    } read_buf_s;
 
    struct write_buf {
       void* buf;        // д����.
-      int64_t bufsize;  // �����С.
-      int64_t offset;   // д�ļ���offset.
+      long long bufsize;  // �����С.
+      long long offset;   // д�ļ���offset.
    } write_buf_s;
 
    uint64_t offset;     // ��ǰ��дָ�����ļ��е�offset.
@@ -101,7 +100,7 @@ typedef struct buf_stream {
 int buf_file_read(stream_t *stream_s, void* buf, int size);
 int buf_file_write(stream_t *stream_s, void *buf, int size);
 int buf_file_peek(stream_t *stream_s, void* buf, int size);
-uint64_t buf_file_seek(stream_t *stream_s, int64_t offset, int whence);
+uint64_t buf_file_seek(stream_t *stream_s, long long offset, int whence);
 int buf_file_close(stream_t *stream_s);
 
 // ���������ļ���д��.

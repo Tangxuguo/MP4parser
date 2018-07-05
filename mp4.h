@@ -736,7 +736,7 @@ typedef struct mp4_box_data_elst_s
     uint32_t entry_count;
 
     uint64_t *segment_duration;
-    int64_t  *media_time;
+    long long  *media_time;
     uint16_t *media_rate_integer;
     uint16_t *media_rate_fraction;
 
@@ -976,7 +976,7 @@ typedef struct mp4_box_data_chpl_s
    struct
    {
       char    *psz_name;
-      int64_t  start;
+      long long  start;
    } p_chapter[256];
 } mp4_box_data_chpl_t;
 
@@ -1187,7 +1187,7 @@ typedef union mp4_box_data_s
 
 typedef struct mp4_box_s
 {
-   int64_t i_pos;
+   long long i_pos;
    uint32_t i_type;
    uint32_t i_shortsize;
    uuid_t i_uuid;
